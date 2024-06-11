@@ -154,7 +154,14 @@ _get_root() {
    _debug "Querying Linode APIv4 for subdomain: $h"
     if _H4="X-Filter: {\"domain\":\"$h\"}" _rest GET; then
       _debug "Got response from API: $response"
+
+      if echo "$response" | grep -q "Invalid Token"; then
+        _debug "Invalid authentication token (authentication failed)"
+        return 1
+      fi
+
       response="$(echo "$response" | tr -d "\n" | tr '{' "|" | sed 's/|/&{/g' | tr "|" "\n")"
+
       hostedzone="$(echo "$response" | _egrep_o "\{.*\"domain\": *\"$h\".*}")"
       if [ "$hostedzone" ]; then
         _domain_id=$(printf "%s\n" "$hostedzone" | _egrep_o "\"id\": *[0-9]+" | _head_n 1 | cut -d : -f 2 | tr -d \ )
