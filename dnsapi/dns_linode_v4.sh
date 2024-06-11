@@ -121,7 +121,13 @@ _Linode_API() {
     return 1
   fi
 
-  _saveaccountconf_mutable LINODE_V4_API_KEY "$LINODE_V4_API_KEY"
+  if _readaccountconf LINODE_V4_API_KEY >/dev/null; then
+    # if it's already saved in the account config, then just return success
+    return 0
+  else
+    # otherwise, save it and return
+    _saveaccountconf_mutable LINODE_V4_API_KEY "$LINODE_V4_API_KEY"
+  fi
 }
 
 ####################  Private functions below ##################################
